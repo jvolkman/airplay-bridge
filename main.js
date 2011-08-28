@@ -2,9 +2,9 @@ var repl = require("repl");
 var net = require('net');
 
 var iscp = require('./lib/iscp');
-//var upnp = require('./lib/upnp');
+var upnp = require('./lib/upnp');
 var b = new iscp.Browser();
-//var ub = new upnp.ControlPoint();
+var ub = new upnp.ControlPoint();
 var c = [];
 b.on('deviceAdded', function(device) {
    console.log('Device added: ');

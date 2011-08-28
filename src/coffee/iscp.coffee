@@ -118,7 +118,7 @@ class DeviceConnection extends events.EventEmitter
     while parsed? 
       offset += parsed.bytesRead
       @emit 'message', parsed.message
-      messagedReceived++
+      messagesReceived++
       try
         parsed = parseMessage @_buf, offset
       catch ex
