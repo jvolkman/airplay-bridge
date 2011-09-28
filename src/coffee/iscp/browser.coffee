@@ -6,11 +6,16 @@ device   = require './device'
 ###
  An ISCP device Browser/tracker.
 ###
-PING_INTERVAL = 15000 # 15 seconds.
-PING_TIMEOUT  = 60000 # 60 seconds.
 class exports.Browser extends events.EventEmitter
   constructor: (opts) ->
-    @_broadcastPort = opts?.broadcastPort? or 60128
+    @_opts = 
+      broadcastPort: 60128
+      broadcastAddress: '255.255.255.255'
+      pingInterval: 15000
+      pingTimeout: 60000
+    
+    @_opts[key] = value for own key, value of opts if opts?
+    
     @_devices = {}
     @_init()
 
@@ -38,7 +43,7 @@ class exports.Browser extends events.EventEmitter
     @_pingInterval = setInterval () =>
       @ping()
       @_pruneDevices()
-    , PING_INTERVAL
+    , @_opts.pingInterval
     true
 
   shutdown: () ->
@@ -52,7 +57,7 @@ class exports.Browser extends events.EventEmitter
 
   ping: () ->
     message = protocol.createMessage 'ECN', 'QSTN'
-    @_socket.send message, 0, message.length, @_broadcastPort, '255.255.255.255'
+    @_socket.send message, 0, message.length, @_opts.broadcastPort, @_opts.broadcastAddress
 
   getDevices: () -> value.device for own key, value of @_devices
 
@@ -79,7 +84,7 @@ class exports.Browser extends events.EventEmitter
   _pruneDevices: () ->
     pruned = 0
     for own key, value of @_devices
-      if value.lastSeen < new Date().getTime() - PING_TIMEOUT
+      if value.lastSeen < new Date().getTime() - @_opts.pingTimeout
         @emit 'deviceRemoved', deviceData.device
         delete @_devices[key]
         pruned++
